@@ -2,10 +2,10 @@ package org.chaves.steven;
 
 import static io.restassured.RestAssured.*; 
 import static org.testng.Assert.*;
+
 import static org.chaves.steven.constants.Constants.*;
 
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test; 
 
 import io.restassured.path.xml.XmlPath; 
@@ -16,20 +16,14 @@ import io.restassured.response.Response;
  */
 public class GeoCodingApiXmlFormatTest {
 
+    private String invalidAddress = "?address=3945+White+Parkway";
+    private String invalidAddressZero = "?address=39455555555555555555555555555555555555555555555555555555";
+
     @BeforeClass
     public void beforeClass() {
         // Setting BaseURI once
         baseURI = "https://maps.googleapis.com/maps/api/geocode";
     }
-
-    @BeforeMethod
-    public void beforeMethod() {
-        // Setting BaseURI once
-        baseURI = "https://maps.googleapis.com/maps/api/geocode";
-    }
-
-    private String invalidAddress = "?address=3945+White+Parkway";
-    private String invalidAddressZero = "?address=39455555555555555555555555555555555555555555555555555555";
 
     @Test(description = "API call asking for XML output without KEY and Address")
     public void testAPIActiveXML() {
@@ -43,7 +37,7 @@ public class GeoCodingApiXmlFormatTest {
 
     @Test(description = "API call asking for XML output without KEY")
     public void testAPIActiveXMLWithAddress() {
-        Response response = given().get("/xml" + defaultHappyAddress);
+        Response response = given().get("/xml" + DEFAULT_HAPPY_ADDRESS);
         response.then().statusCode(200);
         XmlPath xmlPath = new XmlPath(response.asString()).setRootPath("GeocodeResponse");
         String actualError = xmlPath.get("error_message");
@@ -55,7 +49,7 @@ public class GeoCodingApiXmlFormatTest {
     public void testAPIActiveXMLWithKey() {
         Response response = given().get("/xml&key=" + API_KEY);
         response.then().statusCode(404);
-        assertTrue(response.getBody().asString().contains("was not found on this server."),
+        assertTrue(response.getBody().asString().contains(EXPECTED_NOT_FOUND),
                 "An error should have been returned in the message");
     }
 
@@ -91,7 +85,7 @@ public class GeoCodingApiXmlFormatTest {
         assertEquals(xmlPath.getString("status"), "OK");
         XmlPath resultPath = xmlPath.setRootPath("GeocodeResponse.result");
         String formattedAddress = resultPath.getString("formatted_address");
-        assertNotEquals(formattedAddress, "Google Building 40, 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA");
+        assertNotEquals(formattedAddress, EXPECTED_FORMATTED_ADDRESS);
         assertTrue(formattedAddress.contains("3945"), "Street Address should have contained 3945");
         assertTrue(formattedAddress.contains("White"), "Street Address should have contained White");
     }
@@ -111,15 +105,14 @@ public class GeoCodingApiXmlFormatTest {
 
     @Test(description = "API call asking for XML output with KEY and address")
     public void testHappyPathXML() {
-        Response response = given().get("/xml" + defaultHappyAddress + "&key=" + API_KEY);
+        Response response = given().get("/xml" + DEFAULT_HAPPY_ADDRESS + "&key=" + API_KEY);
         response.then().statusCode(200);
         XmlPath xmlPath = new XmlPath(response.asString()).setRootPath("GeocodeResponse");
         String actualError = xmlPath.getString("error_message");
         assertEquals(actualError, "");
         assertEquals(xmlPath.getString("status"), "OK");
         XmlPath resultPath = xmlPath.setRootPath("GeocodeResponse.result");
-        assertEquals(resultPath.getString("formatted_address"),
-                "Google Building 40, 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA");
+        assertEquals(resultPath.getString("formatted_address"), EXPECTED_FORMATTED_ADDRESS);
     }
 }
 

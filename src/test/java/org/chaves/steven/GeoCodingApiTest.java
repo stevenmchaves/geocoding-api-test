@@ -1,7 +1,8 @@
 package org.chaves.steven; 
 
 import static io.restassured.RestAssured. * ; 
-import static org.testng.Assert. * ; 
+import static org.testng.Assert. * ;
+
 import static org.chaves.steven.constants.Constants. * ; 
 
 import org.testng.annotations.BeforeClass; 
@@ -25,26 +26,26 @@ public class GeoCodingApiTest {
     public void testAPIActive() {
         Response response = given().get(); 
         response.then().statusCode(404); 
-        assertTrue(response.getBody().asString().contains("was not found on this server."), ERROR_RETURN_MSG); 
+        assertTrue(response.getBody().asString().contains(EXPECTED_NOT_FOUND), ERROR_RETURN_MSG); 
     }
 
     @Test(description = "without supplying format, any parameters you test its active and return is 404")
     public void testAPIActiveWithAddressKey() {
-        Response response = given().get(defaultHappyAddress + "&key=" + API_KEY); 
+        Response response = given().get(DEFAULT_HAPPY_ADDRESS + "&key=" + API_KEY); 
         response.then().statusCode(404); 
-        assertTrue(response.getBody().asString().contains("was not found on this server."), ERROR_RETURN_MSG); 
+        assertTrue(response.getBody().asString().contains(EXPECTED_NOT_FOUND), ERROR_RETURN_MSG); 
     }
 
     @Test(description = "without supplying format, any parameters you test its active and return is 404")
     public void testAPIActiveWithAddress() {
         Response response = given().get("&key=" + API_KEY);
         response.then().statusCode(404);
-        assertTrue(response.getBody().asString().contains("was not found on this server."), ERROR_RETURN_MSG);
+        assertTrue(response.getBody().asString().contains(EXPECTED_NOT_FOUND), ERROR_RETURN_MSG);
     }
 
     @Test(description = "without supplying format, any parameters you test its active and return is 404")
     public void testAPIActiveWithInvalidKey() {
-        Response response = given().get(String.format("/json%s&key=%s11111", defaultHappyAddress, API_KEY)); 
+        Response response = given().get(String.format("/json%s&key=%s11111", DEFAULT_HAPPY_ADDRESS, API_KEY)); 
         response.then().statusCode(200); 
         JsonPath responseJson = response.jsonPath(); 
         assertEquals(responseJson.get("status"), "REQUEST_DENIED"); 
